@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./css/bootstrap.css" />
+    <link rel="stylesheet" href="./css/bootstrap-responsive.css" />
+    <style>
+        body {
+            padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        }
+    </style>
+    <title>Drive Blog</title>
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a class="brand" href="https://googledrive.com/host/0ByRgQIhodQXfaVdHOElsZTV5c3c/driveblog/">Drive Blog</a>
+            <div class="nav-collapse">
+                <ul class="nav" id="siteLinks"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div id="content"></div>
+</div>
+<script src="./js/jquery.js"></script>
+<script src="./js/jquery-ui.js"></script>
+<script src="./js/bootstrap.js"></script>
+<script src="./js/jsrender.js"></script>
+<script src="./js/functions.js"></script>
+<script>
+    $(function(){
+        $.ajax({
+            dataType: "json",
+            url: "https://spreadsheets.google.com/feeds/list/0AiRgQIhodQXfdGZ5OV9INlNRME9YUnc2VUhmRGtPaVE/od6/public/values?alt=json",
+            success: function(data){
+                $.each(data.feed.entry, function(k, v){
+                    var post = {};
+                    post.date = v.gsx$date.$t;
+                    post.title = v.gsx$title.$t;
+                    post.content = Base64.decode(v.gsx$content.$t);
+                    $("#content").append($("#addPost").render(post));
+                });
+            }
+        });
+    });
+
+</script>
+<script id="addPost" type="x/js-render">
+    <article>
+        <header>
+            <h2>{{>title}}</h2>
+            <p>Published: <time pubdate="pubdate">{{>date}}</time></p>
+        </header>
+        {{:content}}
+    </article>
+</script>
+</body>
+</html>
