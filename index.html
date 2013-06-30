@@ -28,6 +28,8 @@
             </div>
         </div>
         <div class="container">
+            <script type="text/javascript">var submitted=false;</script>
+            <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted){window.location='https://googledrive.com/host/0ByRgQIhodQXfaVdHOElsZTV5c3c/driveblog/';}"></iframe>
             <section id="content"></section>
         </div>
         <script src="./js/jquery.js"></script>
@@ -57,43 +59,96 @@
                             $("#content").append($("#addPost").render(post));
                             addPostLinks(k, post.link, post.title);
                         });
+                        $(".form-horizontal").hide();
                         $.ajax({
                             dataType: "json",
-                            url: "https://spreadsheets.google.com/feeds/list/0AiRgQIhodQXfdGZ5OV9INlNRME9YUnc2VUhmRGtPaVE/od7/public/values?alt=json",
+                            url: "https://spreadsheets.google.com/feeds/list/0AiRgQIhodQXfdGZ5OV9INlNRME9YUnc2VUhmRGtPaVE/od8/public/values?alt=json",
                             success: function(data){
                                 $.each(data.feed.entry, function(k, v){
+                                    console.log(v);
                                     var comment = {};
-                                    comment.postId = v.gsx$postid.$t;
-                                    comment.content = Base64.decode(v.gsx$what.$t);
-                                    comment.date = v.gsx$when.$t;
-                                    comment.pubdate = createDateStamp(v.gsx$when.$t);
+                                    comment.postId = parseInt(v.gsx$postid.$t, 10);
+                                    comment.content = v.gsx$what.$t;
+                                    comment.date = v.gsx$timestamp.$t;
+                                    comment.pubdate = createDateStamp(v.gsx$timestamp.$t);
                                     comment.who = v.gsx$who.$t;
                                     comment.icon = md5(v.gsx$who.$t);
                                     comments.push(comment);
                                 });
                                 $.each(comments, function(k,comment){
-                                    $("article[data-id='"+comment.postId+"']").append($("#addComment").render(comment))
-
+                                    $("article[data-id='"+comment.postId+"'] .comments").append($("#addComment").render(comment))
+                                });
+                                $(".post").each(function(){
+                                    var $this = $(this);
+                                    var commentsSection = $this.find(".comments");
+                                    if(commentsSection.find("article").length === 0){
+                                        commentsSection.hide();
+                                    }
                                 });
                             }
+                        });
+                    }
+                });
+                $("#content").on("click", ".showCommentArea", function(){
+                    var $this = $(this);
+                    var parent = $this.parent();
+                    if($this.text() === "New Comment"){
+                        parent.find(".form-horizontal").slideDown('slow', function(){
+                            $this.text("Hide new comment form")
+                        });
+                    }else{
+                        parent.find(".form-horizontal").slideUp('slow', function(){
+                            $this.text("New Comment");
                         });
                     }
                 });
             });
         </script>
         <script id="addPost" type="x/js-render">
-            <article data-id="{{>id}}">
+            <article data-id="{{>id}}" class="post">
                 <header>
                     <h2><a name="{{:link}}">{{>title}}</a></h2>
                     <p>Published: <time pubdate="{{>pubdate}}">{{>date}}</time></p>
                 </header>
                 {{:content}}
+                <section class="comments">
+                    <h3>Comments</h3>
+                </section>
+                <section class="newComment">
+                    <h3 class="showCommentArea">New Comment</h3>
+                    <form action="https://docs.google.com/forms/d/1YNJnVEo2lnle0mCbjOhiLQi4SQ4X4sEKhVgKGyRLMvE/formResponse" method="POST" target="hidden_iframe" onsubmit="" class="form-horizontal">
+                        <fieldset>
+                            <legend>Your Comment</legend>
+                            <input type="hidden" name="entry.1732417772" value="{{>id}}"/>
+                            <div class="control-group">
+                                <label class="control-label" for="entry_1188980396{{>id}}">Email Address</label>
+                                <div class="controls">
+                                    <input class="span8" id="entry_1188980396{{>id}}" name="entry.1188980396" type="text" placeholder="email" class="input-xlarge">
+                                    <p class="help-block">Please provide an email address associated with a <a href="http://gravatar.com">Gravatar</a></p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="entry_144231699{{>id}}">Comment</label>
+                                <div class="controls">
+                                    <textarea rows="4" class="span8" id="entry_144231699{{>id}}" name="entry.144231699"></textarea>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="singlebutton{{>id}}"></label>
+                                <div class="controls">
+                                    <input type="submit" id="singlebutton{{>id}}" name="submit" value="Submit" class="btn btn-primary"/>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </section>
             </article>
+            <hr />
         </script>
         <script id="addComment" type="x/js-render">
             <article>
                 <header>
-                    <h2><a name="{{:who}}">{{>who}}</a></h2>
+                    <h4><a name="{{:who}}">{{>who}}</a></h4>
                     <img src="http://www.gravatar.com/avatar/{{:icon}}?s=50" alt="icon for {{:who}}"/>
                     <p>Published: <time pubdate="{{>pubdate}}">{{>date}}</time></p>
                 </header>
