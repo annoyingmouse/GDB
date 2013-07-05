@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <link rel="stylesheet" href="./css/bootstrap.css" />
         <link rel="stylesheet" href="./css/bootstrap-responsive.css" />
+        <link rel="stylesheet" href="./css/captcha.css"/>
         <style>
             body {
                 padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -37,6 +38,7 @@
         <script src="./js/bootstrap.js"></script>
         <script src="./js/jsrender.js"></script>
         <script src="./js/functions.js"></script>
+        <script src="./js/captcha.js"></script>
         <script>
             var posts = [];
             var comments = [];
@@ -64,6 +66,7 @@
                             dataType: "json",
                             url: "https://spreadsheets.google.com/feeds/list/0AiRgQIhodQXfdGZ5OV9INlNRME9YUnc2VUhmRGtPaVE/od8/public/values?alt=json",
                             success: function(data){
+<<<<<<< HEAD
                                 $.each(data.feed.entry, function(k, v){
                                     var comment = {};
                                     comment.postId = parseInt(v.gsx$postid.$t, 10);
@@ -84,6 +87,30 @@
                                         commentsSection.hide();
                                     }
                                 });
+=======
+                                if(!empty(data.feed.entry)){
+                                    $.each(data.feed.entry, function(k, v){
+                                        var comment = {};
+                                        comment.postId = parseInt(v.gsx$postid.$t, 10);
+                                        comment.content = Base64.decode(v.gsx$what.$t);
+                                        comment.date = v.gsx$timestamp.$t;
+                                        comment.pubdate = createDateStamp(v.gsx$timestamp.$t);
+                                        comment.who = v.gsx$who.$t;
+                                        comment.icon = md5(v.gsx$who.$t);
+                                        comments.push(comment);
+                                    });
+                                    $.each(comments, function(k,comment){
+                                        $("article[data-id='"+comment.postId+"'] .comments").append($("#addComment").render(comment))
+                                    });
+                                    $(".post").each(function(){
+                                        var $this = $(this);
+                                        var commentsSection = $this.find(".comments");
+                                        if(commentsSection.find("article").length === 0){
+                                            commentsSection.hide();
+                                        }
+                                    });
+                                }
+>>>>>>> Added Captcha and Comments (Base64 encoded)
                             }
                         });
                     }
@@ -95,13 +122,35 @@
                         parent.find(".form-horizontal").slideDown('slow', function(){
                             $this.text("Hide new comment form")
                         });
+                        $(".sortable").sortable();
+                        $(".sortable").disableSelection();
+                        $('ul.sortable').shuffle();
                     }else{
                         parent.find(".form-horizontal").slideUp('slow', function(){
                             $this.text("New Comment");
                         });
                     }
                 });
+                $("#content").on("submit", "form", function(e){
+                    var theForm = $(e.target);
+                    var formId = theForm.attr("data-sortable");
+                    if($('ul.sortable[data-id="' + formId + '"]').validate()){
+                        if(!validateEmail(theForm.find('input[type="email"]').val())){
+                            e.preventDefault();
+                            alert("Please Provide a valid email address!");
+                        }else{
+                            theForm.find("textarea").val(Base64.encode(theForm.find("textarea").val()));
+                        }
+                    }else{
+                        e.preventDefault();
+                        alert("No, you are not a human!");
+                    }
+                });
             });
+            function validateEmail(email) {
+                var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(email);
+            }
         </script>
         <script id="addPost" type="x/js-render">
             <article data-id="{{>id}}" class="post">
@@ -115,7 +164,7 @@
                 </section>
                 <section class="newComment">
                     <h3 class="showCommentArea">New Comment</h3>
-                    <form action="https://docs.google.com/forms/d/1YNJnVEo2lnle0mCbjOhiLQi4SQ4X4sEKhVgKGyRLMvE/formResponse" method="POST" target="hidden_iframe" onsubmit="submitted=true;" class="form-horizontal">
+                    <form action="https://docs.google.com/forms/d/1YNJnVEo2lnle0mCbjOhiLQi4SQ4X4sEKhVgKGyRLMvE/formResponse" method="POST" target="hidden_iframe" onsubmit="submitted=true;" class="form-horizontal" data-sortable="{{>id}}">
                         <fieldset>
                             <legend>Your Comment</legend>
                             <input type="hidden" name="entry.1732417772" value="{{>id}}"/>
@@ -130,7 +179,23 @@
                                 <label class="control-label" for="entry_144231699{{>id}}">Comment</label>
                                 <div class="controls">
                                     <textarea rows="4" class="span8" id="entry_144231699{{>id}}" name="entry.144231699" required></textarea>
+<<<<<<< HEAD
+=======
                                 </div>
+                            </div>
+                            <div class="captcha_wrap">
+                                <div class="captcha">
+                                    Drag to order
+>>>>>>> Added Captcha and Comments (Base64 encoded)
+                                </div>
+                                <ul class="sortable" data-id="{{>id}}">
+                                    <li class="captchaItem">1</li>
+                                    <li class="captchaItem">2</li>
+                                    <li class="captchaItem">3</li>
+                                    <li class="captchaItem">4</li>
+                                    <li class="captchaItem">5</li>
+                                    <li class="captchaItem">6</li>
+                                </ul>
                             </div>
                             <div class="control-group">
                                 <label class="control-label" for="singlebutton{{>id}}"></label>
