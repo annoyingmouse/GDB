@@ -35,6 +35,7 @@
         </div>
         <script src="./js/jquery.js"></script>
         <script src="./js/jquery-ui.js"></script>
+        <script src="./js/jquery.ui.touch-punch.js"></script>
         <script src="./js/bootstrap.js"></script>
         <script src="./js/jsrender.js"></script>
         <script src="./js/functions.js"></script>
@@ -99,16 +100,14 @@
                         parent.find(".form-horizontal").slideDown('slow', function(){
                             $this.text("Hide new comment form")
                         });
-                        $(".sortable").sortable();
-                        $(".sortable").disableSelection();
+                        $(".sortable").sortable().disableSelection();
                         $('ul.sortable').shuffle();
                     }else{
                         parent.find(".form-horizontal").slideUp('slow', function(){
                             $this.text("New Comment");
                         });
                     }
-                });
-                $("#content").on("submit", "form", function(e){
+                }).on("submit", "form", function(e){
                     var theForm = $(e.target);
                     var formId = theForm.attr("data-sortable");
                     if($('ul.sortable[data-id="' + formId + '"]').validate()){
@@ -148,7 +147,7 @@
                             <div class="control-group">
                                 <label class="control-label" for="entry_1188980396{{>id}}">Email Address</label>
                                 <div class="controls">
-                                    <input class="span8" id="entry_1188980396{{>id}}" name="entry.1188980396" placeholder="email" class="input-xlarge" type="email" required>
+                                    <input id="entry_1188980396{{>id}}" name="entry.1188980396" placeholder="email" class="input-xlarge span8" type="email" required>
                                     <p class="help-block">Please provide an email address associated with a <a href="http://gravatar.com">Gravatar</a></p>
                                 </div>
                             </div>
